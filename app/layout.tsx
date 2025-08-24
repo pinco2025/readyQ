@@ -16,8 +16,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${geist.variable} antialiased`}>
-      <body className="bg-[#1A1A1A] text-[#E5E7EB] font-sans">
+          <html lang="en" className={`${geist.variable} antialiased dark`}>
+      <body className="bg-background text-foreground font-sans">
         <ErrorBoundary>
           <AuthProvider>
             {children}
