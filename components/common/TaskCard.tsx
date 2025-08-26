@@ -53,16 +53,27 @@ export function TaskCard({ task, priority, priorityColor }: TaskCardProps) {
     e.stopPropagation()
     
     try {
-      const { error } = await toggleTaskCompletion(task.id)
+      // Cycle through the three states: todo -> in_progress -> done -> todo
+      const currentStatus = task.status
+      let newStatus: 'todo' | 'in_progress' | 'done'
+      
+      if (currentStatus === 'todo') {
+        newStatus = 'in_progress'
+      } else if (currentStatus === 'in_progress') {
+        newStatus = 'done'
+      } else {
+        newStatus = 'todo'
+      }
+      
+      const { error } = await updateTask(task.id, { status: newStatus })
       if (error) {
-        console.error('Failed to toggle task completion:', error)
+        console.error('Failed to update task status:', error)
         announceToScreenReader('Failed to update task status')
       } else {
-        const newStatus = task.status === 'done' ? 'todo' : 'done'
-        announceToScreenReader(`Task marked as ${newStatus}`)
+        announceToScreenReader(`Task status changed to ${newStatus}`)
       }
     } catch (err) {
-      console.error('Error toggling task completion:', err)
+      console.error('Error updating task status:', err)
       announceToScreenReader('Error updating task status')
     }
   }
@@ -100,9 +111,9 @@ export function TaskCard({ task, priority, priorityColor }: TaskCardProps) {
   const getStatusIcon = () => {
     switch (task.status) {
       case 'done':
-        return <CheckCircle2 size={20} className="text-[#8B5CF6]" />
+        return <CheckCircle2 size={20} className="text-[#10B981]" />
       case 'in_progress':
-        return <CircleDot size={20} className="text-[#8B5CF6] fill-[#8B5CF6]" />
+        return <CircleDot size={20} className="text-[#8B7280] fill-[#8B5CF6]" />
       case 'todo':
       default:
         return <Circle size={20} className="text-[#6B7280]" />
@@ -121,14 +132,26 @@ export function TaskCard({ task, priority, priorityColor }: TaskCardProps) {
     }
   }
 
+  const getNextStatusText = () => {
+    switch (task.status) {
+      case 'todo':
+        return 'in progress'
+      case 'in_progress':
+        return 'completed'
+      case 'done':
+      default:
+        return 'to do'
+    }
+  }
+
   const isCompleted = task.status === 'done'
 
   return (
     <div 
       ref={setNodeRef}
       style={style}
-      className={`bg-[#1A1A1A] border border-[#374151]/30 rounded-lg p-4 hover:border-[#8B5CF6]/30 transition-all group ${
-        isDragging ? 'shadow-lg scale-105 z-50' : ''
+      className={`bg-[#1A1A1A] border border-[#374151]/30 rounded-lg p-4 transition-all duration-200 group cursor-pointer ${
+        isDragging ? 'shadow-lg scale-105 z-50' : 'hover:scale-[1.02] hover:shadow-lg hover:shadow-[#8B5CF6]/10 hover:border-[#8B5CF6]/30'
       }`}
       role="article"
       aria-label={`Task: ${task.name}, Priority: ${priority}, Status: ${getStatusText()}, Category: ${taskCategory?.name || 'none'}`}
@@ -138,6 +161,15 @@ export function TaskCard({ task, priority, priorityColor }: TaskCardProps) {
         if (e.target === e.currentTarget) {
           e.preventDefault()
         }
+      }}
+      onClick={(e) => {
+        // Only open modal if clicking on the card itself, not on interactive elements
+        if (e.target === e.currentTarget || (e.target as HTMLElement).closest('[data-no-modal]')) {
+          return
+        }
+        // Open detail modal via custom event; Kanban will listen
+        const openEvent = new CustomEvent('open-task-detail', { detail: { taskId: task.id } })
+        window.dispatchEvent(openEvent)
       }}
     >
       <div className="flex items-start gap-3">
@@ -152,6 +184,7 @@ export function TaskCard({ task, priority, priorityColor }: TaskCardProps) {
           aria-describedby={`task-${task.id}-description`}
           onMouseDown={(e) => e.stopPropagation()}
           onTouchStart={(e) => e.stopPropagation()}
+          data-no-modal
         >
           <GripVertical size={16} />
         </div>
@@ -162,9 +195,10 @@ export function TaskCard({ task, priority, priorityColor }: TaskCardProps) {
           onMouseDown={(e) => e.stopPropagation()}
           onTouchStart={(e) => e.stopPropagation()}
           className="mt-0.5 hover:text-[#8B5CF6] transition-colors flex-shrink-0"
-          aria-label={`Mark task as ${isCompleted ? 'incomplete' : 'complete'}`}
+          aria-label={`Mark task as ${getNextStatusText()}`}
           aria-pressed={isCompleted}
           type="button"
+          data-no-modal
         >
           {getStatusIcon()}
         </button>
@@ -215,6 +249,7 @@ export function TaskCard({ task, priority, priorityColor }: TaskCardProps) {
                   className="h-8 w-8 p-0 hover:bg-[#374151]/50 hover:text-[#8B5CF6] transition-all duration-200 rounded-md"
                   aria-label="Task options menu"
                   aria-haspopup="true"
+                  data-no-modal
                 >
                   <MoreVertical size={16} />
                 </Button>
@@ -224,6 +259,7 @@ export function TaskCard({ task, priority, priorityColor }: TaskCardProps) {
                   onClick={() => handleStatusChange('todo')}
                   className="hover:bg-[#374151]/50 focus:bg-[#374151]/50 cursor-pointer text-slate-200 hover:text-white transition-colors px-3 py-2 rounded-md hover:border-l-2 hover:border-l-[#6B7280]"
                   aria-label="Mark as To Do"
+                  data-no-modal
                 >
                   <Circle className="mr-3 h-4 w-4 text-[#6B7280]" />
                   Mark as To Do
@@ -232,6 +268,7 @@ export function TaskCard({ task, priority, priorityColor }: TaskCardProps) {
                   onClick={() => handleStatusChange('in_progress')}
                   className="hover:bg-[#374151]/50 focus:bg-[#374151]/50 cursor-pointer text-slate-200 hover:text-white transition-colors px-3 py-2 rounded-md hover:border-l-2 hover:border-l-[#8B5CF6]"
                   aria-label="Mark as In Progress"
+                  data-no-modal
                 >
                   <Clock className="mr-3 h-4 w-4 text-[#8B5CF6]" />
                   Mark as In Progress
@@ -240,6 +277,7 @@ export function TaskCard({ task, priority, priorityColor }: TaskCardProps) {
                   onClick={() => handleStatusChange('done')}
                   className="hover:bg-[#374151]/50 focus:bg-[#374151]/50 cursor-pointer text-slate-200 hover:text-white transition-colors px-3 py-2 rounded-md hover:border-l-2 hover:border-l-[#10B981]"
                   aria-label="Mark as Done"
+                  data-no-modal
                 >
                   <CheckCircle className="mr-3 h-4 w-4 text-[#10B981]" />
                   Mark as Done
@@ -253,6 +291,7 @@ export function TaskCard({ task, priority, priorityColor }: TaskCardProps) {
                       className="hover:bg-red-500/20 focus:bg-red-500/20 text-red-400 hover:text-red-300 cursor-pointer px-3 py-2 rounded-md transition-colors border-l-2 border-l-transparent hover:border-l-red-500"
                       onSelect={(e) => e.preventDefault()}
                       aria-label="Delete task"
+                      data-no-modal
                     >
                       <Trash2 className="mr-3 h-4 w-4" />
                       Delete Task

@@ -144,17 +144,17 @@ export function SettingsView() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0A0A0A] to-[#1A1A1A]">
-      <header className="border-b border-[#374151]/30 bg-[#111111]/80 backdrop-blur-sm p-6 sticky top-0 z-10">
+      <header className="border-b border-[#374151]/30 bg-[#111111]/80 backdrop-blur-sm p-4 md:p-6 md:sticky md:top-0 md:z-10">
         <div className="max-w-screen-xl mx-auto">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-gradient-to-r from-[#8B5CF6] to-[#A855F7] rounded-lg">
               <Settings className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-[#E5E7EB] bg-clip-text text-transparent">
+              <h1 className="text-2xl md:text-3xl font-bold text-white md:bg-gradient-to-r md:from-white md:to-[#E5E7EB] md:bg-clip-text md:text-transparent">
                 Settings
               </h1>
-              <p className="text-[#9CA3AF] mt-1 text-lg">
+              <p className="text-[#9CA3AF] mt-1 text-base md:text-lg">
                 Manage your account settings and preferences
               </p>
             </div>
@@ -162,7 +162,7 @@ export function SettingsView() {
         </div>
       </header>
 
-      <div className="p-6">
+      <div className="p-4 md:p-6">
         <div className="max-w-screen-xl mx-auto space-y-8">
           <div className="grid gap-8 max-w-4xl">
             {/* Profile Settings */}

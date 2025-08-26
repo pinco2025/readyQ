@@ -4,8 +4,9 @@ import { KanbanColumn } from "./KanbanColumn"
 import { useTasks } from "@/hooks/useTasks"
 import { Loader2 } from "lucide-react"
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors, DragOverEvent } from "@dnd-kit/core"
-import { useState, useCallback, useMemo } from "react"
+import { useState, useCallback, useMemo, useEffect } from "react"
 import { TaskCard } from "./TaskCard"
+import { TaskDetailModal } from "@/components/views/TaskDetailModal"
 import type { Task } from "@/lib/firebase-types"
 import { usePerformance } from "@/hooks/usePerformance"
 
@@ -18,6 +19,7 @@ export function KanbanBoard({ viewMode }: KanbanBoardProps) {
   const { measureRender, optimizeTaskList } = usePerformance()
   const [activeTask, setActiveTask] = useState<Task | null>(null)
   const [isDragging, setIsDragging] = useState(false)
+  const [detailTaskId, setDetailTaskId] = useState<string | null>(null)
 
   // Configure sensors for drag detection - hooks must be called at the top level
   const sensors = useSensors(
@@ -92,6 +94,18 @@ export function KanbanBoard({ viewMode }: KanbanBoardProps) {
     }
   }, [viewMode, tasks, updateTask])
 
+  // Handle open-task-detail events dispatched from TaskCard
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const custom = e as CustomEvent<{ taskId: string }>
+      setDetailTaskId(custom.detail.taskId)
+    }
+    window.addEventListener('open-task-detail', handler as EventListener)
+    return () => window.removeEventListener('open-task-detail', handler as EventListener)
+  }, [])
+
+  const activeDetailTask = useMemo(() => tasks.find(t => t.id === detailTaskId) || null, [tasks, detailTaskId])
+
   // Performance measurement
   const renderComplete = measureRender('KanbanBoard')
 
@@ -127,7 +141,7 @@ export function KanbanBoard({ viewMode }: KanbanBoardProps) {
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className={`h-full p-6 transition-all duration-200 ${isDragging ? 'bg-[#0F0F0F]/50' : ''}`}>
+      <div className={`h-full p-4 md:p-6 transition-all duration-200 ${isDragging ? 'bg-[#0F0F0F]/50' : ''} kanban-container`}>
         <div className="max-w-screen-xl mx-auto h-full">
           {tasks.length === 0 ? (
             <div className="h-full flex items-center justify-center">
@@ -146,7 +160,7 @@ export function KanbanBoard({ viewMode }: KanbanBoardProps) {
               </div>
             </div>
           ) : viewMode === 'priority' ? (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 h-full kanban-columns">
               <KanbanColumn 
                 key="high-priority"
                 id="high"
@@ -173,7 +187,7 @@ export function KanbanBoard({ viewMode }: KanbanBoardProps) {
               />
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 h-full kanban-columns">
               <KanbanColumn 
                 key="todo-status"
                 id="todo"
@@ -220,6 +234,8 @@ export function KanbanBoard({ viewMode }: KanbanBoardProps) {
           </div>
         ) : null}
       </DragOverlay>
+      {/* Task Detail Modal */}
+      <TaskDetailModal open={Boolean(detailTaskId)} task={activeDetailTask} onOpenChange={(open) => setDetailTaskId(open && activeDetailTask ? activeDetailTask.id : null)} />
     </DndContext>
   )
 }

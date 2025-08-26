@@ -50,39 +50,35 @@ export function DashboardView() {
   
   return (
     <div className="h-screen flex flex-col">
-      <header className="border-b border-[#374151]/30 p-6">
+      <header className="border-b border-[#374151]/30 p-4 md:p-6 md:sticky md:top-0 md:z-10 bg-transparent">
         <div className="max-w-screen-xl mx-auto">
-          <div className="flex items-center justify-between">
+          <div className="flex items-start md:items-center justify-between gap-3 md:gap-6 flex-col md:flex-row">
             <div>
-              <h1 className="text-2xl font-bold">
+              <h1 className="text-xl md:text-2xl font-bold">
                 {headerContent.title}
               </h1>
-              <p className="text-[#6B7280] mt-1">
+              <p className="text-[#6B7280] mt-1 text-sm md:text-base">
                 {headerContent.description}
               </p>
             </div>
             
-            <div className="flex items-center gap-4">
-              
-              
-              <div className="flex items-center gap-2">
-                <Button
-                  {...priorityButtonProps}
-                  size="sm"
-                  onClick={handlePriorityView}
-                >
-                  <LayoutGrid size={16} />
-                  Priority
-                </Button>
-                <Button
-                  {...statusButtonProps}
-                  size="sm"
-                  onClick={handleStatusView}
-                >
-                  <List size={16} />
-                  Status
-                </Button>
-              </div>
+            <div className="w-full md:w-auto flex items-center md:justify-end gap-2 md:gap-3 flex-wrap">
+              <Button
+                {...priorityButtonProps}
+                size="sm"
+                onClick={handlePriorityView}
+              >
+                <LayoutGrid size={16} />
+                Priority
+              </Button>
+              <Button
+                {...statusButtonProps}
+                size="sm"
+                onClick={handleStatusView}
+              >
+                <List size={16} />
+                Status
+              </Button>
             </div>
           </div>
         </div>

@@ -93,14 +93,14 @@ export function CategoryEditModal({ category, isOpen, onClose, onSave }: Categor
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="bg-[#111111] border-[#374151] text-white max-w-md">
-        <DialogHeader>
+      <DialogContent className="bg-[#111111] border-[#374151] text-white md:max-w-md w-[100vw] h-[100dvh] md:h-auto md:w-auto rounded-none md:rounded-lg p-0 md:p-6">
+        <DialogHeader className="sticky top-0 z-10 bg-[#111111] border-b border-[#374151]/30 px-4 md:px-0 py-4">
           <DialogTitle className="text-xl font-semibold text-white">
             Edit Category
           </DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 px-4 md:px-0 py-4 md:py-0 overflow-y-auto max-h-[calc(100dvh-4rem)] md:max-h-none">
           <div className="space-y-2">
             <Label htmlFor="editCategoryName" className="text-white text-sm font-medium">
               Category Name

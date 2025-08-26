@@ -15,7 +15,7 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
-  const { signIn } = useAuth()
+  const { signIn, signInWithGoogle } = useAuth()
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -89,6 +89,36 @@ export function LoginForm() {
             {isLoading ? "Signing in..." : "Sign In"}
           </Button>
         </form>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-[#374151]/50" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-transparent px-2 text-muted-foreground">Or continue with</span>
+          </div>
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full border-[#374151] text-slate-200 hover:bg-[#1A1A1A]"
+          onClick={async () => {
+            setIsLoading(true)
+            setError(null)
+            const result = await signInWithGoogle()
+            if (result.error) {
+              setError(result.error)
+              setIsLoading(false)
+            } else {
+              setIsLoading(false)
+              router.push('/dashboard')
+            }
+          }}
+          disabled={isLoading}
+        >
+          Continue with Google
+        </Button>
         
         <div className="text-center text-sm">
           <span className="text-muted-foreground">Don't have an account? </span>
