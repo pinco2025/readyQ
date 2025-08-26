@@ -25,10 +25,10 @@ export function RegisterForm() {
     setError(null)
 
     try {
-      const result = await signUp({ email, password, name })
+      const result = await signUp(email, password, name)
       
       if (result.error) {
-        setError(result.error.message)
+        setError(result.error)
       } else {
         // Redirect to dashboard on successful registration
         router.push("/dashboard")

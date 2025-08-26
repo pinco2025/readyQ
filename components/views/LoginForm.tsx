@@ -24,10 +24,10 @@ export function LoginForm() {
     setError(null)
 
     try {
-      const result = await signIn({ email, password })
+      const result = await signIn(email, password)
       
       if (result.error) {
-        setError(result.error.message)
+        setError(result.error)
       } else {
         // Redirect to dashboard on successful login
         router.push("/dashboard")

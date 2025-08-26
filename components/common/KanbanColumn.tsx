@@ -1,5 +1,5 @@
 import { TaskCard } from "./TaskCard"
-import type { Database } from "@/lib/supabase"
+import type { Task } from "@/lib/firebase-types"
 import { useDroppable } from "@dnd-kit/core"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 

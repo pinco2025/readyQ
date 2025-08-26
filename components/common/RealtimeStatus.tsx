@@ -1,146 +1,106 @@
 'use client'
 
-import { Wifi, WifiOff, AlertCircle, RefreshCw, Power, PowerOff } from 'lucide-react'
-import { useRealtime } from '@/hooks/useRealtime'
+import { useEffect, useState } from 'react'
+import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { Button } from '@/components/ui/button'
+import { Wifi, WifiOff, AlertCircle, CheckCircle2 } from 'lucide-react'
 
 interface RealtimeStatusProps {
-  showText?: boolean
-  size?: 'sm' | 'md' | 'lg'
-  className?: string
-  showRetryButton?: boolean
-  showToggleButton?: boolean
-  showDebugInfo?: boolean
+  isConnected: boolean
+  lastUpdate: Date | null
+  updateCount: number
 }
 
-export function RealtimeStatus({ 
-  showText = true, 
-  size = 'md', 
-  className = '',
-  showRetryButton = false,
-  showToggleButton = false,
-  showDebugInfo = false
-}: RealtimeStatusProps) {
-  const { isConnected, retryConnection, enableRealtime, disableRealtime, isRealtimeEnabled } = useRealtime()
+export function RealtimeStatus({ isConnected, lastUpdate, updateCount }: RealtimeStatusProps) {
+  const [timeSinceLastUpdate, setTimeSinceLastUpdate] = useState<string>('')
 
-  const getIconSize = () => {
-    switch (size) {
-      case 'sm': return 12
-      case 'md': return 16
-      case 'lg': return 20
-      default: return 16
-    }
-  }
-
-  const getTextSize = () => {
-    switch (size) {
-      case 'sm': return 'text-xs'
-      case 'md': return 'text-sm'
-      case 'lg': return 'text-base'
-      default: return 'text-sm'
-    }
-  }
-
-  const getStatusInfo = () => {
-    if (!isRealtimeEnabled) {
-      return {
-        icon: PowerOff,
-        color: 'text-gray-500',
-        text: 'Realtime disabled',
-        tooltip: 'Real-time updates are disabled. The app will use polling for updates.'
+  useEffect(() => {
+    const updateTimeSince = () => {
+      if (!lastUpdate) {
+        setTimeSinceLastUpdate('Never')
+        return
       }
-    } else if (isConnected) {
-      return {
-        icon: Wifi,
-        color: 'text-green-500',
-        text: 'Live updates enabled',
-        tooltip: 'Real-time updates are working. Changes will appear instantly across all devices.'
+
+      const now = new Date()
+      const diff = now.getTime() - lastUpdate.getTime()
+      const seconds = Math.floor(diff / 1000)
+      const minutes = Math.floor(seconds / 60)
+      const hours = Math.floor(minutes / 60)
+
+      if (seconds < 60) {
+        setTimeSinceLastUpdate(`${seconds}s ago`)
+      } else if (minutes < 60) {
+        setTimeSinceLastUpdate(`${minutes}m ago`)
+      } else {
+        setTimeSinceLastUpdate(`${hours}h ago`)
       }
+    }
+
+    updateTimeSince()
+    const interval = setInterval(updateTimeSince, 1000)
+
+    return () => clearInterval(interval)
+  }, [lastUpdate])
+
+  const getStatusIcon = () => {
+    if (isConnected) {
+      return <CheckCircle2 className="h-4 w-4 text-green-500" />
     } else {
-      return {
-        icon: WifiOff,
-        color: 'text-red-500',
-        text: 'Offline mode',
-        tooltip: 'Real-time updates are disabled. You may need to check your connection or Supabase configuration.'
-      }
+      return <AlertCircle className="h-4 w-4 text-red-500" />
     }
   }
 
-  const statusInfo = getStatusInfo()
-  const IconComponent = statusInfo.icon
+  const getStatusText = () => {
+    if (isConnected) {
+      return 'Real-time connected'
+    } else {
+      return 'Real-time disconnected'
+    }
+  }
+
+  const getStatusColor = () => {
+    if (isConnected) {
+      return 'bg-green-500/10 text-green-600 border-green-500/20'
+    } else {
+      return 'bg-red-500/10 text-red-600 border-red-500/20'
+    }
+  }
 
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className={`flex items-center gap-2 ${className}`}>
-            <IconComponent 
-              size={getIconSize()} 
-              className={statusInfo.color} 
-            />
-            {showText && (
-              <span className={`${getTextSize()} ${statusInfo.color}`}>
-                {statusInfo.text}
+          <Badge 
+            variant="outline" 
+            className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium ${getStatusColor()}`}
+          >
+            {getStatusIcon()}
+            <span>{getStatusText()}</span>
+            {isConnected && (
+              <span className="text-xs opacity-70">
+                {timeSinceLastUpdate}
               </span>
             )}
-            {showRetryButton && !isConnected && isRealtimeEnabled && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) => {
-                  e.preventDefault()
-                  retryConnection()
-                }}
-                className="h-6 w-6 p-0 hover:bg-red-500/10"
-              >
-                <RefreshCw size={12} className="text-red-500" />
-              </Button>
-            )}
-            {showToggleButton && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) => {
-                  e.preventDefault()
-                  if (isRealtimeEnabled) {
-                    disableRealtime()
-                  } else {
-                    enableRealtime()
-                  }
-                }}
-                className="h-6 w-6 p-0 hover:bg-blue-500/10"
-                title={isRealtimeEnabled ? 'Disable realtime' : 'Enable realtime'}
-              >
-                {isRealtimeEnabled ? (
-                  <PowerOff size={12} className="text-blue-500" />
-                ) : (
-                  <Power size={12} className="text-blue-500" />
-                )}
-              </Button>
-            )}
-          </div>
+          </Badge>
         </TooltipTrigger>
         <TooltipContent>
-          <p>{statusInfo.tooltip}</p>
-          {!isConnected && isRealtimeEnabled && showRetryButton && (
-            <p className="text-xs mt-1 text-gray-400">
-              Click the refresh button to retry connection
+          <div className="text-center">
+            <p className="font-medium mb-1">
+              {isConnected ? 'Real-time Active' : 'Real-time Inactive'}
             </p>
-          )}
-          {showToggleButton && (
-            <p className="text-xs mt-1 text-gray-400">
-              Click the power button to {isRealtimeEnabled ? 'disable' : 'enable'} realtime
-            </p>
-          )}
-          {showDebugInfo && (
-            <div className="text-xs mt-2 p-2 bg-gray-800 rounded border">
-              <p><strong>Debug Info:</strong></p>
-              <p>Realtime Enabled: {isRealtimeEnabled ? 'Yes' : 'No'}</p>
-              <p>Connected: {isConnected ? 'Yes' : 'No'}</p>
-              <p>Status: {statusInfo.text}</p>
-            </div>
-          )}
+            {isConnected ? (
+              <div className="text-xs space-y-1">
+                <p>Last update: {timeSinceLastUpdate}</p>
+                <p>Total updates: {updateCount}</p>
+                <p>Firebase Firestore connected</p>
+              </div>
+            ) : (
+              <div className="text-xs">
+                <p>Real-time updates are disabled.</p>
+                <p>You may need to check your Firebase configuration.</p>
+              </div>
+            )}
+          </div>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

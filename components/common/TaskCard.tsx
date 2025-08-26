@@ -16,7 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import type { Database } from "@/lib/supabase"
+import type { Task } from "@/lib/firebase-types"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { useAccessibility } from "@/hooks/useAccessibility"

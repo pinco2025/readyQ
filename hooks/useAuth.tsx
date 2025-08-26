@@ -1,16 +1,22 @@
 'use client'
 
 import { useState, useEffect, createContext, useContext } from 'react'
-import { User } from '@supabase/supabase-js'
-import { signIn, signUp, signOut, getCurrentUser, onAuthStateChange } from '@/lib/auth'
-import { SignInData, SignUpData, AuthError } from '@/lib/auth'
+import { 
+  User,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  updateProfile
+} from 'firebase/auth'
+import { auth } from '@/lib/firebase'
 
 interface AuthContextType {
   user: User | null
   loading: boolean
-  signIn: (data: SignInData) => Promise<{ user: string | null; error: AuthError | null }>
-  signUp: (data: SignUpData) => Promise<{ user: string | null; error: AuthError | null }>
-  signOut: () => Promise<{ error: AuthError | null }>
+  signIn: (email: string, password: string) => Promise<{ error: string | null }>
+  signUp: (email: string, password: string, name: string) => Promise<{ error: string | null }>
+  logout: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -20,68 +26,71 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Get initial session
-    const getInitialSession = async () => {
-      try {
-        const { user, error } = await getCurrentUser()
-        if (error) {
-          // Only log non-session-missing errors to reduce console noise
-          if (error.message !== 'Auth session missing!') {
-            console.error('Error getting current user:', error.message)
-          }
-          // This is normal - no user is logged in yet
-        } else {
-          setUser(user)
-        }
-      } catch (error) {
-        console.error('Unexpected error getting current user:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    getInitialSession()
-
-    // Listen for auth state changes
-    const { data: { subscription } } = onAuthStateChange((event, session) => {
-      console.log('Auth state change:', event, session?.user?.email || 'No user')
-      setUser(session?.user ?? null)
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user)
       setLoading(false)
     })
 
-    return () => subscription.unsubscribe()
+    return () => unsubscribe()
   }, [])
 
-  const handleSignIn = async (data: SignInData) => {
-    const result = await signIn(data)
-    if (result.user) {
-      // User will be set via the auth state change listener
+  const signIn = async (email: string, password: string) => {
+    try {
+      console.log('Attempting to sign in with:', { email, password: '***' })
+      const userCredential = await signInWithEmailAndPassword(auth, email, password)
+      console.log('Sign in successful:', userCredential.user.email)
+      setUser(userCredential.user)
+      return { error: null }
+    } catch (error: any) {
+      console.error('Sign in error:', error)
+      console.error('Error code:', error.code)
+      console.error('Error message:', error.message)
+      return { error: error.message || 'Failed to sign in' }
     }
-    return result
   }
 
-  const handleSignUp = async (data: SignUpData) => {
-    const result = await signUp(data)
-    if (result.user) {
-      // User will be set via the auth state change listener
+  const signUp = async (email: string, password: string, name: string) => {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+      
+      // Update the user's display name
+      await updateProfile(userCredential.user, {
+        displayName: name
+      })
+      
+      // Wait a moment for Firebase to process the profile update
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      // Force reload the user profile to get the latest data
+      await userCredential.user.reload()
+      
+      // Refresh the user state with the updated profile
+      setUser({ ...userCredential.user })
+      
+      return { error: null }
+    } catch (error: any) {
+      console.error('Sign up error:', error)
+      return { error: error.message || 'Failed to sign up' }
     }
-    return result
   }
 
-  const handleSignOut = async () => {
-    const result = await signOut()
-    if (!result.error) {
+  const logout = async () => {
+    try {
+      await signOut(auth)
       setUser(null)
+    } catch (error) {
+      console.error('Logout error:', error)
     }
-    return result
   }
+
+
 
   const value = {
     user,
     loading,
-    signIn: handleSignIn,
-    signUp: handleSignUp,
-    signOut: handleSignOut,
+    signIn,
+    signUp,
+    logout
   }
 
   return (

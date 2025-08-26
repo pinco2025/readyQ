@@ -31,7 +31,7 @@ export function usePerformance(): UsePerformanceReturn {
       metricsRef.current.renderTime = renderTime
       
       if (process.env.NODE_ENV === 'development') {
-        console.log(`${componentName} render time: ${renderTime.toFixed(2)}ms`)
+    
       }
     }
   }, [])

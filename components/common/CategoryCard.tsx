@@ -25,9 +25,10 @@ interface Category {
 interface CategoryCardProps {
   category: Category
   onDelete: () => void
+  onEdit: (category: Category) => void
 }
 
-export function CategoryCard({ category, onDelete }: CategoryCardProps) {
+export function CategoryCard({ category, onDelete, onEdit }: CategoryCardProps) {
   const taskCount = category.taskCount || 0
 
   return (
@@ -59,8 +60,9 @@ export function CategoryCard({ category, onDelete }: CategoryCardProps) {
             <Button 
               variant="outline" 
               size="sm" 
-              className="h-9 px-3 border-[#4B5563] bg-[#1A1A1A] text-[#E5E7EB] hover:bg-[#374151]/50 hover:text-white hover:border-[#8B5CF6] transition-colors"
+              className="h-9 px-3 border-[#4B5563] bg-[#1A1A1A] text-[#E5E7EB] hover:bg-[#374151]/50 hover:text-white hover:border-[#8B5CF6] hover:shadow-[#8B5CF6]/20 transition-all duration-200"
               aria-label="Edit category"
+              onClick={() => onEdit(category)}
             >
               <Edit2 size={14} className="mr-2" />
               Edit

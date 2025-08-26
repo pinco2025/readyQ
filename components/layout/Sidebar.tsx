@@ -9,20 +9,18 @@ import { useAuth } from "@/hooks/useAuth"
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Categories", href: "/dashboard/categories", icon: FolderOpen },
-  { name: "Settings", href: "#", icon: Settings },
+  { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ]
 
 export function Sidebar() {
   const pathname = usePathname()
-  const { signOut, user } = useAuth()
+  const { logout, user } = useAuth()
   const router = useRouter()
 
   const handleSignOut = async () => {
     try {
-      const result = await signOut()
-      if (!result.error) {
-        router.push("/login")
-      }
+      await logout()
+      router.push("/login")
     } catch (error) {
       console.error("Error signing out:", error)
     }
@@ -36,7 +34,7 @@ export function Sidebar() {
         </h1>
         {user && (
           <p className="text-sm text-[#6B7280] mt-2">
-            Welcome back, {user.user_metadata?.full_name || user.email}
+            Welcome back, {user.displayName || user.email}
           </p>
         )}
       </div>

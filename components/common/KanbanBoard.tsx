@@ -6,10 +6,8 @@ import { Loader2 } from "lucide-react"
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors, DragOverEvent } from "@dnd-kit/core"
 import { useState, useCallback, useMemo } from "react"
 import { TaskCard } from "./TaskCard"
-import type { Database } from "@/lib/supabase"
+import type { Task } from "@/lib/firebase-types"
 import { usePerformance } from "@/hooks/usePerformance"
-
-type Task = Database['public']['Tables']['tasks']['Row']
 
 interface KanbanBoardProps {
   viewMode: 'priority' | 'status'
@@ -21,7 +19,7 @@ export function KanbanBoard({ viewMode }: KanbanBoardProps) {
   const [activeTask, setActiveTask] = useState<Task | null>(null)
   const [isDragging, setIsDragging] = useState(false)
 
-  // Configure sensors for drag detection
+  // Configure sensors for drag detection - hooks must be called at the top level
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -150,6 +148,7 @@ export function KanbanBoard({ viewMode }: KanbanBoardProps) {
           ) : viewMode === 'priority' ? (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
               <KanbanColumn 
+                key="high-priority"
                 id="high"
                 title="High Priority" 
                 priority="high" 
@@ -157,6 +156,7 @@ export function KanbanBoard({ viewMode }: KanbanBoardProps) {
                 color="#EF4444" 
               />
               <KanbanColumn 
+                key="medium-priority"
                 id="medium"
                 title="Medium Priority" 
                 priority="medium" 
@@ -164,6 +164,7 @@ export function KanbanBoard({ viewMode }: KanbanBoardProps) {
                 color="#F59E0B" 
               />
               <KanbanColumn 
+                key="low-priority"
                 id="low"
                 title="Low Priority" 
                 priority="low" 
@@ -174,6 +175,7 @@ export function KanbanBoard({ viewMode }: KanbanBoardProps) {
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
               <KanbanColumn 
+                key="todo-status"
                 id="todo"
                 title="To Do" 
                 priority="todo" 
@@ -181,6 +183,7 @@ export function KanbanBoard({ viewMode }: KanbanBoardProps) {
                 color="#6B7280" 
               />
               <KanbanColumn 
+                key="in-progress-status"
                 id="in_progress"
                 title="In Progress" 
                 priority="in_progress" 
@@ -188,6 +191,7 @@ export function KanbanBoard({ viewMode }: KanbanBoardProps) {
                 color="#8B5CF6" 
               />
               <KanbanColumn 
+                key="done-status"
                 id="done"
                 title="Done" 
                 priority="done" 

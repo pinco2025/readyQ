@@ -7,15 +7,21 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CategoryCard } from "@/components/common/CategoryCard"
+import { CategoryEditModal } from "@/components/common/CategoryEditModal"
 import { useCategories } from "@/hooks/useCategories"
 import { useToast } from "@/hooks/use-toast"
+import type { Category } from "@/lib/firebase-types"
 
 export function CategoryManagement() {
   const [newCategoryName, setNewCategoryName] = useState("")
   const [newCategoryColor, setNewCategoryColor] = useState("#8B5CF6")
   const [isSubmitting, setIsSubmitting] = useState(false)
   
-  const { categories, loading, error, createCategory, deleteCategory } = useCategories()
+  // Edit modal state
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  
+  const { categories, loading, error, createCategory, updateCategory, deleteCategory } = useCategories()
   const { toast } = useToast()
 
   const handleAddCategory = async () => {
@@ -23,6 +29,17 @@ export function CategoryManagement() {
       toast({
         title: "Error",
         description: "Category name is required",
+        variant: "destructive",
+      })
+      return
+    }
+
+    // Validate hex color format
+    const hexColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
+    if (!hexColorRegex.test(newCategoryColor)) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid hex color (e.g., #8B5CF6)",
         variant: "destructive",
       })
       return
@@ -61,6 +78,33 @@ export function CategoryManagement() {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  const handleEditCategory = (category: Category) => {
+    setEditingCategory(category)
+    setIsEditModalOpen(true)
+  }
+
+  const handleSaveEdit = async (id: string, updates: { name: string; color: string }) => {
+    try {
+      const { error } = await updateCategory(id, updates)
+      
+      if (error) {
+        return { error }
+      }
+      
+      // Close modal on success
+      setIsEditModalOpen(false)
+      setEditingCategory(null)
+      return { error: null }
+    } catch (err) {
+      return { error: "Failed to update category" }
+    }
+  }
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false)
+    setEditingCategory(null)
   }
 
   const handleDeleteCategory = async (id: string) => {
@@ -188,10 +232,10 @@ export function CategoryManagement() {
                     />
                   </div>
                 </div>
-                <div className="flex items-end">
+                <div className="flex items-end gap-3">
                   <Button
                     onClick={handleAddCategory}
-                    className="w-full h-12 bg-gradient-to-r from-[#8B5CF6] to-[#A855F7] hover:from-[#7C3AED] hover:to-[#9333EA] text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+                    className="flex-1 h-12 bg-gradient-to-r from-[#8B5CF6] to-[#A855F7] hover:from-[#7C3AED] hover:to-[#9333EA] text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
@@ -206,6 +250,20 @@ export function CategoryManagement() {
                       </>
                     )}
                   </Button>
+                  {(newCategoryName.trim() || newCategoryColor !== "#8B5CF6") && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setNewCategoryName("")
+                        setNewCategoryColor("#8B5CF6")
+                      }}
+                      className="h-12 px-4 border-[#374151] bg-[#1A1A1A] text-[#9CA3AF] hover:bg-[#374151] hover:text-white"
+                      disabled={isSubmitting}
+                    >
+                      Reset
+                    </Button>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -228,6 +286,7 @@ export function CategoryManagement() {
                       key={category.id}
                       category={category}
                       onDelete={() => handleDeleteCategory(category.id)}
+                      onEdit={handleEditCategory}
                     />
                   ))}
                 </div>
@@ -246,6 +305,14 @@ export function CategoryManagement() {
           )}
         </div>
       </div>
+
+      {/* Edit Category Modal */}
+      <CategoryEditModal
+        category={editingCategory}
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        onSave={handleSaveEdit}
+      />
     </div>
   )
 }
