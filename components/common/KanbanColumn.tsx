@@ -3,8 +3,6 @@ import type { Task } from "@/lib/firebase-types"
 import { useDroppable } from "@dnd-kit/core"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 
-type Task = Database['public']['Tables']['tasks']['Row']
-
 interface KanbanColumnProps {
   id: string
   title: string

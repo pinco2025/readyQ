@@ -14,13 +14,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-
-interface Category {
-  id: string
-  name: string
-  color: string
-  taskCount?: number
-}
+import type { Category } from "@/lib/firebase-types"
 
 interface CategoryCardProps {
   category: Category
@@ -29,8 +23,6 @@ interface CategoryCardProps {
 }
 
 export function CategoryCard({ category, onDelete, onEdit }: CategoryCardProps) {
-  const taskCount = category.taskCount || 0
-
   return (
     <Card className="bg-[#111111]/80 border-[#374151]/30 hover:border-[#8B5CF6]/50 transition-all duration-200 group hover:shadow-lg hover:shadow-[#8B5CF6]/10">
       <CardContent className="p-6">
@@ -49,9 +41,7 @@ export function CategoryCard({ category, onDelete, onEdit }: CategoryCardProps) 
               </h3>
               <div className="flex items-center gap-2 text-[#9CA3AF]">
                 <Tag className="h-4 w-4" />
-                <span className="text-sm">
-                  {taskCount} {taskCount === 1 ? 'task' : 'tasks'}
-                </span>
+                <span className="text-sm">Category</span>
               </div>
             </div>
           </div>
@@ -60,7 +50,7 @@ export function CategoryCard({ category, onDelete, onEdit }: CategoryCardProps) 
             <Button 
               variant="outline" 
               size="sm" 
-              className="h-9 px-3 border-[#4B5563] bg-[#1A1A1A] text-[#E5E7EB] hover:bg-[#374151]/50 hover:text-white hover:border-[#8B5CF6] hover:shadow-[#8B5CF6]/20 transition-all duration-200"
+              className="h-9 px-3 border-[#4B5563] bg-[#1A1A1A] text-[#E5E7EB] hover:bg-[#374151]/50 hover:text-white hover:border-[#8B5CF6] transition-colors"
               aria-label="Edit category"
               onClick={() => onEdit(category)}
             >
@@ -85,10 +75,10 @@ export function CategoryCard({ category, onDelete, onEdit }: CategoryCardProps) 
                   <AlertDialogTitle className="text-slate-50">
                     Delete Category
                   </AlertDialogTitle>
-                  <AlertDialogDescription className="text-[#9CA3AF]">
-                    Are you sure you want to delete "{category.name}"? This action cannot be undone and will remove all tasks associated with this category.
-                  </AlertDialogDescription>
                 </AlertDialogHeader>
+                <AlertDialogDescription className="text-[#9CA3AF]">
+                  Are you sure you want to delete "{category.name}"? This action cannot be undone and will remove all tasks associated with this category.
+                </AlertDialogDescription>
                 <AlertDialogFooter>
                   <AlertDialogCancel className="bg-[#374151] border-[#374151] text-slate-200 hover:bg-[#4B5563]">
                     Cancel

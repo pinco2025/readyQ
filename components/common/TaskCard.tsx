@@ -21,8 +21,6 @@ import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { useAccessibility } from "@/hooks/useAccessibility"
 
-type Task = Database['public']['Tables']['tasks']['Row']
-
 interface TaskCardProps {
   task: Task
   priority: "high" | "medium" | "low"

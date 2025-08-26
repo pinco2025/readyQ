@@ -143,12 +143,8 @@ export function useCategories(): UseCategoriesReturn {
     }
 
     try {
-
-
       const categoryRef = doc(db, 'categories', id)
-      await updateDoc(categoryRef, updates)
-
-
+      await updateDoc(categoryRef, updates as any)
       
       // Real-time listener will automatically update the UI
       return { category: null, error: null }
