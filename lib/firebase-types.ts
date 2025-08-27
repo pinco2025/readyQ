@@ -60,3 +60,35 @@ export interface CategoryUpdate {
   name?: string
   color?: string
 }
+
+export interface Note {
+  id: string
+  user_id: string
+  title: string
+  content: string
+  category_id: string | null
+  is_personal: boolean
+  is_pinned: boolean
+  created_at: Date
+  updated_at: Date
+}
+
+export interface NoteInsert {
+  user_id: string
+  title: string
+  content: string
+  category_id?: string | null
+  is_personal?: boolean
+  is_pinned?: boolean
+  created_at?: Date
+  updated_at?: Date
+}
+
+export interface NoteUpdate {
+  title?: string
+  content?: string
+  category_id?: string | null
+  is_personal?: boolean
+  is_pinned?: boolean
+  updated_at?: Date
+}

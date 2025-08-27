@@ -2,13 +2,14 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { LayoutDashboard, FolderOpen, Settings, LogOut } from "lucide-react"
+import { LayoutDashboard, FolderOpen, Settings, LogOut, StickyNote } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/hooks/useAuth"
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Categories", href: "/dashboard/categories", icon: FolderOpen },
+  { name: "Notes", href: "/dashboard/notes", icon: StickyNote },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ]
 
@@ -39,7 +40,7 @@ export function Sidebar() {
         )}
       </div>
 
-      <nav className="flex-1 px-2 md:px-4 space-y-2 overflow-auto">
+      <nav className="flex-1 px-2 md:px-4 space-y-2 overflow-auto scrollbar-hide">
         {navigation.map((item) => {
           const Icon = item.icon
           const isActive = pathname === item.href

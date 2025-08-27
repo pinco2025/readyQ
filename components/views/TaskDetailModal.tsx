@@ -126,7 +126,7 @@ export function TaskDetailModal({ open, task, onOpenChange }: TaskDetailModalPro
           </div>
         </DialogHeader>
 
-        <div className="px-4 md:px-6 py-3 md:py-4 space-y-3 md:space-y-4 overflow-y-auto max-h-[calc(100dvh-5rem)] md:max-h-none">
+        <div className="px-4 md:px-6 py-3 md:py-4 space-y-3 md:space-y-4 overflow-y-auto max-h-[calc(100dvh-5rem)] md:max-h-none scrollbar-hide">
           <div className="flex items-center gap-2 md:gap-3 flex-wrap">
             {/* Status toggle */}
             <Button

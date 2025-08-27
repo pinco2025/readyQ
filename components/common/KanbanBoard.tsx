@@ -141,7 +141,7 @@ export function KanbanBoard({ viewMode }: KanbanBoardProps) {
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className={`h-full p-4 md:p-6 transition-all duration-200 ${isDragging ? 'bg-[#0F0F0F]/50' : ''} kanban-container overflow-auto`}>
+      <div className={`h-full p-4 md:p-6 transition-all duration-200 ${isDragging ? 'bg-[#0F0F0F]/50' : ''} kanban-container overflow-auto scrollbar-hide`}>
         <div className="max-w-screen-xl mx-auto min-h-full pb-8">
           {tasks.length === 0 ? (
             <div className="h-full flex items-center justify-center">

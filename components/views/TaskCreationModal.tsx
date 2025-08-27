@@ -136,7 +136,7 @@ export function TaskCreationModal({ isOpen, onClose }: TaskCreationModalProps) {
               <X size={16} />
             </Button>
           </CardHeader>
-          <CardContent className="space-y-4 md:space-y-6 pt-4 md:pt-6 px-4 md:px-6 overflow-y-auto max-h-[calc(100dvh-4rem)] md:max-h-none">
+          <CardContent className="space-y-4 md:space-y-6 pt-4 md:pt-6 px-4 md:px-6 overflow-y-auto max-h-[calc(100dvh-4rem)] md:max-h-none scrollbar-hide">
             <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="taskName" className="text-white font-medium">Task Name *</Label>

@@ -3,10 +3,12 @@
 import Link from "next/link"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { AlertCircle, X } from "lucide-react"
 import { useAuth } from "@/hooks/useAuth"
 
 export function LoginForm() {
@@ -48,8 +50,21 @@ export function LoginForm() {
       <CardContent className="space-y-4">
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="p-3 text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-md">
-              {error}
+            <div className="relative p-4 text-sm bg-red-500/10 border border-red-500/20 rounded-lg">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-red-500 font-medium">Authentication Error</p>
+                  <p className="text-red-400 mt-1">{error}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setError(null)}
+                  className="text-red-400 hover:text-red-300 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           )}
           
@@ -102,7 +117,7 @@ export function LoginForm() {
         <Button
           type="button"
           variant="outline"
-          className="w-full border-[#374151] text-slate-200 hover:bg-[#1A1A1A]"
+          className="w-full border-[#374151] text-slate-200 hover:bg-[#1A1A1A] flex items-center justify-center gap-3"
           onClick={async () => {
             setIsLoading(true)
             setError(null)
@@ -117,7 +132,14 @@ export function LoginForm() {
           }}
           disabled={isLoading}
         >
-          Continue with Google
+          <Image
+            src="/google-logo.svg"
+            alt="Google"
+            width={20}
+            height={20}
+            className="w-5 h-5"
+          />
+          {isLoading ? "Signing in..." : "Continue with Google"}
         </Button>
         
         <div className="text-center text-sm">

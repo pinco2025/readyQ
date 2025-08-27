@@ -3,11 +3,8 @@
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Check, ChevronsUpDown, Plus, X, Tag, ChevronDown } from "lucide-react"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { useCategories } from "@/hooks/useCategories"
 import { useToast } from "@/hooks/use-toast"
 import type { Category } from "@/lib/firebase-types"
@@ -17,18 +14,23 @@ interface CategorySelectorProps {
   onChange: (categoryId: string | null) => void
   placeholder?: string
   disabled?: boolean
+  compact?: boolean
 }
 
 export function CategorySelector({ 
   value, 
   onChange, 
   placeholder = "Select category...",
-  disabled = false 
+  disabled = false,
+  compact = false
 }: CategorySelectorProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [newCategoryName, setNewCategoryName] = useState("")
   const [newCategoryColor, setNewCategoryColor] = useState("#8B5CF6")
   const [isCreating, setIsCreating] = useState(false)
+  const [showCreateForm, setShowCreateForm] = useState(false)
+  const [newlyCreatedId, setNewlyCreatedId] = useState<string | null>(null)
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   
   const { categories, createCategory, loading, error } = useCategories()
@@ -41,6 +43,7 @@ export function CategorySelector({
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false)
+        setShowCreateForm(false)
       }
     }
 
@@ -53,6 +56,7 @@ export function CategorySelector({
   const handleCategorySelect = (categoryId: string | null) => {
     onChange(categoryId)
     setIsOpen(false)
+    setShowCreateForm(false)
   }
 
   const handleCreateCategory = async () => {
@@ -85,11 +89,19 @@ export function CategorySelector({
           description: "Category created successfully!",
         })
         
-        // Select the newly created category
-        onChange(category.id)
+        // Reset form and return to category list instead of auto-selecting
         setNewCategoryName("")
         setNewCategoryColor("#8B5CF6")
-        setIsOpen(false)
+        setShowCreateForm(false)
+        setNewlyCreatedId(category.id)
+        setShowSuccessMessage(true)
+        // Keep dropdown open to show the updated list
+        
+        // Clear the highlight and success message after a few seconds
+        setTimeout(() => {
+          setNewlyCreatedId(null)
+          setShowSuccessMessage(false)
+        }, 3000)
       }
     } catch (err) {
       toast({
@@ -106,39 +118,24 @@ export function CategorySelector({
     onChange(null)
   }
 
-  const handleOpenChange = (open: boolean) => {
-    setIsOpen(open)
-    if (!open) {
-      // Reset form when closing
-      setNewCategoryName("")
-      setNewCategoryColor("#8B5CF6")
-    }
-  }
-
   const predefinedColors = [
-    "#8B5CF6", // Purple
-    "#EF4444", // Red
-    "#10B981", // Green
-    "#F59E0B", // Yellow
-    "#3B82F6", // Blue
-    "#F97316", // Orange
-    "#EC4899", // Pink
-    "#06B6D4", // Cyan
+    "#8B5CF6", "#EF4444", "#10B981", "#F59E0B", 
+    "#3B82F6", "#F97316", "#EC4899", "#06B6D4"
   ]
 
   return (
-    <div className="space-y-2 relative" ref={dropdownRef}>
+    <div className="relative" ref={dropdownRef}>
       {selectedCategory ? (
         <div className="flex items-center gap-2">
           <Badge 
-            className="text-xs px-3 py-1"
+            className="text-xs px-2 py-1 h-6"
             style={{ 
               backgroundColor: selectedCategory.color,
               color: 'white',
               border: 'none'
             }}
           >
-            <Tag size={12} className="mr-1" />
+            <Tag size={10} className="mr-1" />
             {selectedCategory.name}
           </Badge>
           <Button
@@ -146,10 +143,10 @@ export function CategorySelector({
             variant="ghost"
             size="sm"
             onClick={handleRemoveCategory}
-            className="h-6 w-6 p-0 hover:bg-red-500/20 hover:text-red-400"
+            className="h-5 w-5 p-0 hover:bg-red-500/20 hover:text-red-400"
             aria-label="Remove category"
           >
-            <X size={12} />
+            <X size={10} />
           </Button>
         </div>
       ) : (
@@ -157,81 +154,116 @@ export function CategorySelector({
           <Button
             type="button"
             variant="outline"
-            className="w-full justify-between text-left font-normal bg-[#2A2A2A] border-[#4B5563] text-gray-400 hover:text-white hover:bg-[#374151]/30"
+            size={compact ? "sm" : "default"}
+            className="w-full justify-between text-left font-normal bg-[#111111] border-[#374151] text-gray-400 hover:text-white hover:bg-[#1A1A1A] h-9 min-w-0"
             disabled={disabled || loading}
             onClick={() => setIsOpen(!isOpen)}
           >
-            <div className="flex items-center">
-              <Tag size={16} className="mr-2 text-[#6B7280]" />
-              <span>
-                {loading ? 'Loading categories...' : placeholder}
+            <div className="flex items-center min-w-0">
+              <Tag size={12} className="mr-2 text-[#6B7280] flex-shrink-0" />
+              <span className="text-sm truncate">
+                {loading ? 'Loading...' : placeholder}
               </span>
             </div>
-            <ChevronDown size={16} className="text-[#6B7280]" />
+            <ChevronDown size={12} className="text-[#6B7280] flex-shrink-0 ml-2" />
           </Button>
           
           {isOpen && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-[#1A1A1A] border border-[#374151] rounded-md shadow-xl z-[9999] max-h-96 overflow-hidden">
-              <div className="p-4 border-b border-[#374151]/30">
-                <h4 className="font-medium text-white mb-3">Select Category</h4>
-                
-                {loading ? (
-                  <div className="flex items-center justify-center py-4">
-                    <div className="w-4 h-4 border-2 border-[#8B5CF6] border-t-transparent rounded-full animate-spin mr-2" />
-                    <span className="text-gray-400">Loading categories...</span>
-                  </div>
-                ) : error ? (
-                  <div className="text-red-400 text-sm py-2">
-                    Error loading categories: {error}
-                  </div>
-                ) : categories.length > 0 ? (
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
-                    {categories.map((category) => (
-                      <button
-                        key={category.id}
-                        type="button"
-                        onClick={() => handleCategorySelect(category.id)}
-                        className="w-full flex items-center gap-3 p-2 rounded-md hover:bg-[#374151]/50 transition-colors text-left"
-                      >
-                        <div 
-                          className="w-4 h-4 rounded-full"
-                          style={{ backgroundColor: category.color }}
-                        />
-                        <span className="text-white">{category.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-4">
-                    <p className="text-gray-400 text-sm mb-3">No categories yet.</p>
+            <div className="absolute top-full left-0 right-0 mt-1 bg-[#1A1A1A] border border-[#374151] rounded-md shadow-xl z-[9999] min-w-[200px] max-w-[280px]">
+              {!showCreateForm ? (
+                <div className="p-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium text-white text-xs">Categories</h4>
                     <Button
                       type="button"
                       size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        // Focus on the category name input
-                        const input = document.querySelector('input[placeholder="Category name"]') as HTMLInputElement
-                        if (input) input.focus()
-                      }}
-                      className="text-[#8B5CF6] border-[#8B5CF6] hover:bg-[#8B5CF6]/20"
+                      variant="ghost"
+                      onClick={() => setShowCreateForm(true)}
+                      className="h-5 px-2 text-xs text-[#8B5CF6] hover:bg-[#8B5CF6]/20"
                     >
-                      <Plus size={14} className="mr-2" />
-                      Create Your First Category
+                      <Plus size={10} className="mr-1" />
+                      New
                     </Button>
                   </div>
-                )}
-              </div>
-
-              <div className="p-4 border-t border-[#374151]/30">
-                <h4 className="font-medium text-white mb-3">Create New Category</h4>
-                
-                <div className="space-y-3">
-                  <div>
+                  
+                  {showSuccessMessage && (
+                    <div className="mb-2 p-1.5 bg-[#10B981]/20 border border-[#10B981]/40 rounded text-xs text-[#10B981]">
+                      ✓ Category created! Select from the list below.
+                    </div>
+                  )}
+                  
+                  {loading ? (
+                    <div className="flex items-center justify-center py-2">
+                      <div className="w-3 h-3 border-2 border-[#8B5CF6] border-t-transparent rounded-full animate-spin mr-2" />
+                      <span className="text-gray-400 text-xs">Loading...</span>
+                    </div>
+                  ) : error ? (
+                    <div className="text-red-400 text-xs py-1">
+                      Error: {error}
+                    </div>
+                  ) : categories.length > 0 ? (
+                    <div className="max-h-32 overflow-y-auto space-y-0.5 scrollbar-hide">
+                      {categories.map((category) => (
+                        <button
+                          key={category.id}
+                          type="button"
+                          onClick={() => handleCategorySelect(category.id)}
+                          className={`w-full flex items-center gap-2 p-1.5 rounded-md transition-colors text-left text-xs ${
+                            newlyCreatedId === category.id 
+                              ? 'bg-[#8B5CF6]/20 border border-[#8B5CF6]/40' 
+                              : 'hover:bg-[#374151]/50'
+                          }`}
+                        >
+                          <div 
+                            className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: category.color }}
+                          />
+                          <span className={`truncate ${
+                            newlyCreatedId === category.id ? 'text-[#8B5CF6] font-medium' : 'text-white'
+                          }`}>
+                            {category.name}
+                            {newlyCreatedId === category.id && ' (New!)'}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-2">
+                      <p className="text-gray-400 text-xs mb-1">No categories yet.</p>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setShowCreateForm(true)}
+                        className="text-xs text-[#8B5CF6] border-[#8B5CF6] hover:bg-[#8B5CF6]/20 h-6"
+                      >
+                        <Plus size={8} className="mr-1" />
+                        Create First
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="p-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium text-white text-xs">New Category</h4>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setShowCreateForm(false)}
+                      className="h-5 w-5 p-0 text-gray-400 hover:text-white"
+                    >
+                      <X size={10} />
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-2">
                     <Input
                       placeholder="Category name"
                       value={newCategoryName}
                       onChange={(e) => setNewCategoryName(e.target.value)}
-                      className="bg-[#2A2A2A] border-[#4B5563] text-white placeholder:text-gray-400 focus:border-[#8B5CF6] focus:ring-[#8B5CF6]/20"
+                      className="h-7 text-xs bg-[#2A2A2A] border-[#4B5563] text-white placeholder:text-gray-400 focus:border-[#8B5CF6] focus:ring-[#8B5CF6]/20"
                       disabled={isCreating}
                       autoFocus
                       onKeyDown={(e) => {
@@ -241,49 +273,56 @@ export function CategorySelector({
                         }
                       }}
                     />
-                  </div>
-                  
-                  <div>
-                    <Label className="text-white text-sm mb-2 block">Color</Label>
-                    <div className="flex gap-2 flex-wrap">
-                      {predefinedColors.map((color) => (
-                        <button
-                          key={color}
-                          type="button"
-                          onClick={() => setNewCategoryColor(color)}
-                          className={`w-6 h-6 rounded-full border-2 transition-all ${
-                            newCategoryColor === color 
-                              ? 'border-white scale-110' 
-                              : 'border-[#4B5563] hover:border-[#6B7280]'
-                          }`}
-                          style={{ backgroundColor: color }}
-                          aria-label={`Select color ${color}`}
-                        />
-                      ))}
+                    
+                    <div>
+                      <div className="flex gap-1 flex-wrap">
+                        {predefinedColors.map((color) => (
+                          <button
+                            key={color}
+                            type="button"
+                            onClick={() => setNewCategoryColor(color)}
+                            className={`w-4 h-4 rounded-full border-2 transition-all ${
+                              newCategoryColor === color 
+                                ? 'border-white scale-110' 
+                                : 'border-[#4B5563] hover:border-[#6B7280]'
+                            }`}
+                            style={{ backgroundColor: color }}
+                            aria-label={`Select color ${color}`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex gap-1">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setShowCreateForm(false)}
+                        className="flex-1 h-6 text-xs border-[#4B5563] text-gray-400 hover:bg-[#374151]/30"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={handleCreateCategory}
+                        className="flex-1 h-6 text-xs bg-[#8B5CF6] hover:bg-[#7C3AED] text-white"
+                        disabled={isCreating || !newCategoryName.trim()}
+                      >
+                        {isCreating ? (
+                          <>
+                            <div className="w-2.5 h-2.5 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
+                            Creating
+                          </>
+                        ) : (
+                          'Create'
+                        )}
+                      </Button>
                     </div>
                   </div>
-
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={handleCreateCategory}
-                    className="w-full bg-gradient-to-r from-[#8B5CF6] to-[#A855F7] hover:from-[#7C3AED] hover:to-[#9333EA] text-white"
-                    disabled={isCreating || !newCategoryName.trim()}
-                  >
-                    {isCreating ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                        Creating...
-                      </>
-                    ) : (
-                      <>
-                        <Plus size={16} className="mr-2" />
-                        Create Category
-                      </>
-                    )}
-                  </Button>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </div>

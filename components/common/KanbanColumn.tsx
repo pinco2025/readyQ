@@ -38,7 +38,7 @@ export function KanbanColumn({ id, title, priority, tasks, color }: KanbanColumn
         </div>
       </div>
 
-      <div className="flex-1 p-4 space-y-3 overflow-y-auto kanban-column-scroll">
+      <div className="flex-1 p-4 space-y-3 overflow-y-auto kanban-column-scroll scrollbar-hide">
         <SortableContext items={tasks.map(task => task.id)} strategy={verticalListSortingStrategy}>
           {tasks.map((task) => (
             <TaskCard key={task.id} task={task} priority={getTaskPriority(task)} priorityColor={color} />

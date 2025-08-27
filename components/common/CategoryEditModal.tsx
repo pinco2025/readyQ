@@ -100,7 +100,7 @@ export function CategoryEditModal({ category, isOpen, onClose, onSave }: Categor
           </DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4 px-4 md:px-0 py-4 md:py-0 overflow-y-auto max-h-[calc(100dvh-4rem)] md:max-h-none">
+        <form onSubmit={handleSubmit} className="space-y-4 px-4 md:px-0 py-4 md:py-0 overflow-y-auto max-h-[calc(100dvh-4rem)] md:max-h-none scrollbar-hide">
           <div className="space-y-2">
             <Label htmlFor="editCategoryName" className="text-white text-sm font-medium">
               Category Name
