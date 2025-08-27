@@ -89,15 +89,15 @@ export function NoteFormModal({
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-[#1A1A1A] border border-[#374151] rounded-lg w-full max-w-2xl max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-[#374151] flex-shrink-0">
-          <h2 className="text-xl font-semibold text-slate-100">
+        <div className="flex items-center justify-between p-4 md:p-6 border-b border-[#374151] flex-shrink-0">
+          <h2 className="text-lg md:text-xl font-semibold text-slate-100">
             {note ? "Edit Note" : "Create Note"}
           </h2>
           <Button
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-200"
+            className="text-slate-400 hover:text-slate-200 h-8 w-8 p-0 touch-manipulation"
           >
             <X className="w-4 h-4" />
           </Button>
@@ -106,7 +106,7 @@ export function NoteFormModal({
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           {/* Scrollable Content */}
-          <div className="p-6 space-y-6 overflow-y-auto flex-1 scrollbar-hide">
+          <div className="p-4 md:p-6 space-y-6 overflow-y-auto flex-1 scrollbar-hide">
             {/* Title */}
             <div className="space-y-2">
               <Label htmlFor="title" className="text-slate-200">
@@ -132,7 +132,7 @@ export function NoteFormModal({
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Write your note content..."
-                className="min-h-[200px] bg-[#111111] border-[#374151] focus:border-[#8B5CF6] focus:ring-[#8B5CF6]/20 resize-none scrollbar-hide"
+                className="min-h-[150px] md:min-h-[200px] bg-[#111111] border-[#374151] focus:border-[#8B5CF6] focus:ring-[#8B5CF6]/20 resize-none scrollbar-hide"
               />
             </div>
 
@@ -180,19 +180,19 @@ export function NoteFormModal({
           </div>
 
           {/* Actions - Always Visible */}
-          <div className="flex justify-end gap-3 p-6 border-t border-[#374151] flex-shrink-0">
+          <div className="flex justify-end gap-3 p-4 md:p-6 border-t border-[#374151] flex-shrink-0">
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
-              className="border-[#374151] text-slate-200 hover:bg-[#374151]/30"
+              className="border-[#374151] text-slate-200 hover:bg-[#374151]/30 h-10 px-4 touch-manipulation"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isLoading || !title.trim()}
-              className="bg-gradient-to-r from-[#8B5CF6] to-[#A855F7] hover:from-[#7C3AED] hover:to-[#9333EA] text-white disabled:opacity-50"
+              className="bg-gradient-to-r from-[#8B5CF6] to-[#A855F7] hover:from-[#7C3AED] hover:to-[#9333EA] text-white disabled:opacity-50 h-10 px-4 touch-manipulation"
             >
               {isLoading ? "Saving..." : note ? "Update Note" : "Create Note"}
             </Button>

@@ -125,9 +125,17 @@ export function useCategories(): UseCategoriesReturn {
 
       const docRef = await addDoc(collection(db, 'categories'), newCategory)
 
+      // Create the category object to return
+      const createdCategory: Category = {
+        id: docRef.id,
+        user_id: user.uid,
+        name: categoryData.name,
+        color: categoryData.color,
+        created_at: new Date()
+      }
       
       // Real-time listener will automatically update the UI
-      return { category: null, error: null }
+      return { category: createdCategory, error: null }
     } catch (err: any) {
       console.error('Error creating category:', err)
       const errorMessage = err.message || 'Failed to create category'
@@ -146,8 +154,17 @@ export function useCategories(): UseCategoriesReturn {
       const categoryRef = doc(db, 'categories', id)
       await updateDoc(categoryRef, updates as any)
       
+      // Create the updated category object to return
+      const updatedCategory: Category = {
+        id,
+        user_id: user.uid,
+        name: updates.name,
+        color: updates.color,
+        created_at: new Date() // This will be updated by the real-time listener
+      }
+      
       // Real-time listener will automatically update the UI
-      return { category: null, error: null }
+      return { category: updatedCategory, error: null }
     } catch (err: any) {
       console.error('Error updating category:', err)
       const errorMessage = err.message || 'Failed to update category'

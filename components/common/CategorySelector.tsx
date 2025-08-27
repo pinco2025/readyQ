@@ -29,8 +29,7 @@ export function CategorySelector({
   const [newCategoryColor, setNewCategoryColor] = useState("#8B5CF6")
   const [isCreating, setIsCreating] = useState(false)
   const [showCreateForm, setShowCreateForm] = useState(false)
-  const [newlyCreatedId, setNewlyCreatedId] = useState<string | null>(null)
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false)
+
   const dropdownRef = useRef<HTMLDivElement>(null)
   
   const { categories, createCategory, loading, error } = useCategories()
@@ -89,19 +88,11 @@ export function CategorySelector({
           description: "Category created successfully!",
         })
         
-        // Reset form and return to category list instead of auto-selecting
+        // Reset form and return to category list
         setNewCategoryName("")
         setNewCategoryColor("#8B5CF6")
         setShowCreateForm(false)
-        setNewlyCreatedId(category.id)
-        setShowSuccessMessage(true)
         // Keep dropdown open to show the updated list
-        
-        // Clear the highlight and success message after a few seconds
-        setTimeout(() => {
-          setNewlyCreatedId(null)
-          setShowSuccessMessage(false)
-        }, 3000)
       }
     } catch (err) {
       toast({
@@ -128,14 +119,14 @@ export function CategorySelector({
       {selectedCategory ? (
         <div className="flex items-center gap-2">
           <Badge 
-            className="text-xs px-2 py-1 h-6"
+            className="text-sm px-3 py-1.5 h-8"
             style={{ 
               backgroundColor: selectedCategory.color,
               color: 'white',
               border: 'none'
             }}
           >
-            <Tag size={10} className="mr-1" />
+            <Tag size={12} className="mr-1" />
             {selectedCategory.name}
           </Badge>
           <Button
@@ -143,10 +134,10 @@ export function CategorySelector({
             variant="ghost"
             size="sm"
             onClick={handleRemoveCategory}
-            className="h-5 w-5 p-0 hover:bg-red-500/20 hover:text-red-400"
+            className="h-8 w-8 p-0 hover:bg-red-500/20 hover:text-red-400 touch-manipulation"
             aria-label="Remove category"
           >
-            <X size={10} />
+            <X size={12} />
           </Button>
         </div>
       ) : (
@@ -155,115 +146,102 @@ export function CategorySelector({
             type="button"
             variant="outline"
             size={compact ? "sm" : "default"}
-            className="w-full justify-between text-left font-normal bg-[#111111] border-[#374151] text-gray-400 hover:text-white hover:bg-[#1A1A1A] h-9 min-w-0"
+            className="w-full justify-between text-left font-normal bg-[#111111] border-[#374151] text-gray-400 hover:text-white hover:bg-[#1A1A1A] h-10 min-w-0 touch-manipulation"
             disabled={disabled || loading}
             onClick={() => setIsOpen(!isOpen)}
           >
             <div className="flex items-center min-w-0">
-              <Tag size={12} className="mr-2 text-[#6B7280] flex-shrink-0" />
+              <Tag size={14} className="mr-2 text-[#6B7280] flex-shrink-0" />
               <span className="text-sm truncate">
                 {loading ? 'Loading...' : placeholder}
               </span>
             </div>
-            <ChevronDown size={12} className="text-[#6B7280] flex-shrink-0 ml-2" />
+            <ChevronDown size={14} className="text-[#6B7280] flex-shrink-0 ml-2" />
           </Button>
           
           {isOpen && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-[#1A1A1A] border border-[#374151] rounded-md shadow-xl z-[9999] min-w-[200px] max-w-[280px]">
+            <div className="absolute top-full left-0 right-0 mt-1 bg-[#1A1A1A] border border-[#374151] rounded-md shadow-xl z-[9999] min-w-[200px] max-w-[280px] md:max-w-[320px]">
               {!showCreateForm ? (
-                <div className="p-2">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium text-white text-xs">Categories</h4>
+                <div className="p-3">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-medium text-white text-sm">Categories</h4>
                     <Button
                       type="button"
                       size="sm"
                       variant="ghost"
                       onClick={() => setShowCreateForm(true)}
-                      className="h-5 px-2 text-xs text-[#8B5CF6] hover:bg-[#8B5CF6]/20"
+                      className="h-8 px-3 text-sm text-[#8B5CF6] hover:bg-[#8B5CF6]/20 touch-manipulation"
                     >
-                      <Plus size={10} className="mr-1" />
+                      <Plus size={14} className="mr-1" />
                       New
                     </Button>
                   </div>
                   
-                  {showSuccessMessage && (
-                    <div className="mb-2 p-1.5 bg-[#10B981]/20 border border-[#10B981]/40 rounded text-xs text-[#10B981]">
-                      ✓ Category created! Select from the list below.
-                    </div>
-                  )}
-                  
                   {loading ? (
-                    <div className="flex items-center justify-center py-2">
-                      <div className="w-3 h-3 border-2 border-[#8B5CF6] border-t-transparent rounded-full animate-spin mr-2" />
-                      <span className="text-gray-400 text-xs">Loading...</span>
+                    <div className="flex items-center justify-center py-3">
+                      <div className="w-4 h-4 border-2 border-[#8B5CF6] border-t-transparent rounded-full animate-spin mr-2" />
+                      <span className="text-gray-400 text-sm">Loading...</span>
                     </div>
                   ) : error ? (
-                    <div className="text-red-400 text-xs py-1">
+                    <div className="text-red-400 text-sm py-2">
                       Error: {error}
                     </div>
                   ) : categories.length > 0 ? (
-                    <div className="max-h-32 overflow-y-auto space-y-0.5 scrollbar-hide">
+                    <div className="max-h-40 overflow-y-auto space-y-1 scrollbar-hide">
                       {categories.map((category) => (
                         <button
                           key={category.id}
                           type="button"
                           onClick={() => handleCategorySelect(category.id)}
-                          className={`w-full flex items-center gap-2 p-1.5 rounded-md transition-colors text-left text-xs ${
-                            newlyCreatedId === category.id 
-                              ? 'bg-[#8B5CF6]/20 border border-[#8B5CF6]/40' 
-                              : 'hover:bg-[#374151]/50'
-                          }`}
+                          className="w-full flex items-center gap-3 p-2 rounded-md transition-colors text-left text-sm hover:bg-[#374151]/50 active:bg-[#374151]/70 touch-manipulation min-h-[44px]"
                         >
                           <div 
-                            className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                            className="w-3 h-3 rounded-full flex-shrink-0"
                             style={{ backgroundColor: category.color }}
                           />
-                          <span className={`truncate ${
-                            newlyCreatedId === category.id ? 'text-[#8B5CF6] font-medium' : 'text-white'
-                          }`}>
+                          <span className="truncate text-white">
                             {category.name}
-                            {newlyCreatedId === category.id && ' (New!)'}
                           </span>
                         </button>
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-2">
-                      <p className="text-gray-400 text-xs mb-1">No categories yet.</p>
+                    <div className="text-center py-4">
+                      <p className="text-gray-400 text-sm mb-2">No categories yet.</p>
                       <Button
                         type="button"
                         size="sm"
                         variant="outline"
                         onClick={() => setShowCreateForm(true)}
-                        className="text-xs text-[#8B5CF6] border-[#8B5CF6] hover:bg-[#8B5CF6]/20 h-6"
+                        className="text-sm text-[#8B5CF6] border-[#8B5CF6] hover:bg-[#8B5CF6]/20 h-8 px-3 touch-manipulation"
                       >
-                        <Plus size={8} className="mr-1" />
+                        <Plus size={12} className="mr-1" />
                         Create First
                       </Button>
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="p-2">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium text-white text-xs">New Category</h4>
+                <div className="p-3">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-medium text-white text-sm">New Category</h4>
                     <Button
                       type="button"
                       size="sm"
                       variant="ghost"
                       onClick={() => setShowCreateForm(false)}
-                      className="h-5 w-5 p-0 text-gray-400 hover:text-white"
+                      className="h-8 w-8 p-0 text-gray-400 hover:text-white touch-manipulation"
                     >
-                      <X size={10} />
+                      <X size={14} />
                     </Button>
                   </div>
                   
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <Input
                       placeholder="Category name"
                       value={newCategoryName}
                       onChange={(e) => setNewCategoryName(e.target.value)}
-                      className="h-7 text-xs bg-[#2A2A2A] border-[#4B5563] text-white placeholder:text-gray-400 focus:border-[#8B5CF6] focus:ring-[#8B5CF6]/20"
+                      className="h-10 text-sm bg-[#2A2A2A] border-[#4B5563] text-white placeholder:text-gray-400 focus:border-[#8B5CF6] focus:ring-[#8B5CF6]/20"
                       disabled={isCreating}
                       autoFocus
                       onKeyDown={(e) => {
@@ -275,13 +253,13 @@ export function CategorySelector({
                     />
                     
                     <div>
-                      <div className="flex gap-1 flex-wrap">
+                      <div className="flex gap-2 flex-wrap">
                         {predefinedColors.map((color) => (
                           <button
                             key={color}
                             type="button"
                             onClick={() => setNewCategoryColor(color)}
-                            className={`w-4 h-4 rounded-full border-2 transition-all ${
+                            className={`w-6 h-6 rounded-full border-2 transition-all touch-manipulation ${
                               newCategoryColor === color 
                                 ? 'border-white scale-110' 
                                 : 'border-[#4B5563] hover:border-[#6B7280]'
@@ -293,13 +271,13 @@ export function CategorySelector({
                       </div>
                     </div>
 
-                    <div className="flex gap-1">
+                    <div className="flex gap-2">
                       <Button
                         type="button"
                         size="sm"
                         variant="outline"
                         onClick={() => setShowCreateForm(false)}
-                        className="flex-1 h-6 text-xs border-[#4B5563] text-gray-400 hover:bg-[#374151]/30"
+                        className="flex-1 h-10 text-sm border-[#4B5563] text-gray-400 hover:bg-[#374151]/30 touch-manipulation"
                       >
                         Cancel
                       </Button>
@@ -307,12 +285,12 @@ export function CategorySelector({
                         type="button"
                         size="sm"
                         onClick={handleCreateCategory}
-                        className="flex-1 h-6 text-xs bg-[#8B5CF6] hover:bg-[#7C3AED] text-white"
+                        className="flex-1 h-10 text-sm bg-[#8B5CF6] hover:bg-[#7C3AED] text-white touch-manipulation"
                         disabled={isCreating || !newCategoryName.trim()}
                       >
                         {isCreating ? (
                           <>
-                            <div className="w-2.5 h-2.5 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
                             Creating
                           </>
                         ) : (
